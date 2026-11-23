@@ -1,0 +1,20 @@
+{
+  "arquivo_origem": "Medicaldataset.csv",
+  "sha256_origem": "70ab2f2ffcd86e56fdbd64cd5fb6c540f663a1721b49e2f09991e2dc6de763b5",
+  "linhas_lidas": 1319,
+  "duplicados_removidos": 0,
+  "atipicos_sinalizados_mantidos": 3,
+  "perda_de_precisao_por_arredondamento": 0,
+  "rejeitadas_total": 0,
+  "rejeitadas_por_motivo": {},
+  "linhas_validas": 1319,
+  "classes_origem_validas": {
+    "positivos": 810,
+    "negativos": 509
+  },
+  "carregado": {
+    "dim_paciente": 140,
+    "dim_clinica": 655,
+    "fato_exames_cardiacos": 1319
+  }
+}

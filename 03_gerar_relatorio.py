@@ -40,6 +40,16 @@ if not (log["arquivo_origem"] == "Medicaldataset.csv" and log["linhas_lidas"] ==
                  "e tente de novo.")
     TESTE = True
 
+# Fatos extraidos do banco carregado, usados nas ressalvas do texto
+import sqlite3
+_c = sqlite3.connect(BASE / "banco" / "datamart_cardiaco.sqlite")
+fc_max, n_fc = _c.execute(
+    "SELECT MAX(c.frequencia_cardiaca), COUNT(*) FROM fato_exames_cardiacos f "
+    "JOIN dim_clinica c ON f.id_clinica = c.id_clinica WHERE c.frequencia_cardiaca > 220").fetchone()
+_ck = sorted(r[0] for r in _c.execute("SELECT ck_mb FROM fato_exames_cardiacos"))
+_c.close()
+ck_med, ck_max, ck_n50 = _ck[len(_ck) // 2], _ck[-1], sum(1 for v in _ck if v > 50)
+
 # ----------------------------------------------------------------------------
 # Estilos (ABNT: A4, margens 3/3/2/2 cm, fonte 12, entrelinhas 1,5)
 # ----------------------------------------------------------------------------
@@ -354,6 +364,13 @@ S += [P(f"A Tabela 3 reconcilia cada etapa do processo. Das {num(N)} linhas lida
         f"{num(cl['positivos'])} são positivos e {num(cl['negativos'])} são negativos. "
         f"Foram sinalizados {num(log['atipicos_sinalizados_mantidos'])} registros com valores atípicos, "
         "mantidos na base.")]
+if n_fc:
+    S += [P(f"Esses registros correspondem a {num(n_fc)} exames com frequência cardíaca de "
+            f"{num(fc_max)} bpm, valor fisiologicamente impossível e provavelmente um erro de "
+            "digitação na origem. Eles foram mantidos porque o DDL não impõe limite superior a esse "
+            "campo e porque corrigir ou excluir o dado cabe ao responsável pela base. Como a "
+            "frequência cardíaca não participa das análises desta etapa, esses registros não afetam "
+            "os resultados apresentados.")]
 S += [bloco_tabela("Tabela 3 – Reconciliação das etapas do ETL", tabela(["Etapa", "Linhas"], t3, [12, 4], (1,)))]
 
 S += [P("3.3 Validação da carga", h2)]
@@ -453,7 +470,11 @@ S += [P(f"Ponderando pelo número de exames, a troponina média é de {dec(tp, 3
         "negativos. Esses valores mostram quanto cada biomarcador se separa entre os dois resultados, "
         "o que é coerente com o papel desses marcadores no diagnóstico do infarto (THYGESEN et al., "
         "2018) e fornece ao gestor uma referência para acompanhar os exames por faixa etária. As "
-        "mesmas tabelas estão prontas para alimentar dashboards.")]
+        "mesmas tabelas estão prontas para alimentar dashboards."),
+      P(f"Uma ressalva: as médias de CK-MB são sensíveis a valores extremos. A mediana geral é de "
+        f"{dec(ck_med, 2)}, enquanto o máximo é de {dec(ck_max, 2)}, e {num(ck_n50)} exames têm CK-MB "
+        "acima de 50. Por isso, a média por faixa deve ser lida com cautela, e a mediana seria uma "
+        "medida complementar adequada em análises futuras.")]
 
 # ============================================================================
 S += [P("4 CONCLUSÃO", h1)]

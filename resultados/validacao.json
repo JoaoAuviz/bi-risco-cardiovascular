@@ -1,0 +1,334 @@
+{
+  "V1_contagem_registros": {
+    "sql": "SELECT 'dim_paciente' AS tabela, COUNT(*) AS registros FROM dim_paciente UNION ALL SELECT 'dim_clinica', COUNT(*) FROM dim_clinica UNION ALL SELECT 'fato_exames_cardiacos', COUNT(*) FROM fato_exames_cardiacos",
+    "colunas": [
+      "tabela",
+      "registros"
+    ],
+    "linhas": [
+      [
+        "dim_paciente",
+        140
+      ],
+      [
+        "dim_clinica",
+        655
+      ],
+      [
+        "fato_exames_cardiacos",
+        1319
+      ]
+    ]
+  },
+  "V2_integridade_referencial": {
+    "sql": "SELECT 'dim_paciente' AS dimensao, COUNT(*) AS fatos_orfaos FROM fato_exames_cardiacos f LEFT JOIN dim_paciente d ON f.id_paciente = d.id_paciente WHERE d.id_paciente IS NULL UNION ALL SELECT 'dim_clinica', COUNT(*) FROM fato_exames_cardiacos f LEFT JOIN dim_clinica d ON f.id_clinica = d.id_clinica WHERE d.id_clinica IS NULL",
+    "colunas": [
+      "dimensao",
+      "fatos_orfaos"
+    ],
+    "linhas": [
+      [
+        "dim_paciente",
+        0
+      ],
+      [
+        "dim_clinica",
+        0
+      ]
+    ]
+  },
+  "V3_distribuicao_resultado": {
+    "sql": "SELECT SUM(CASE WHEN resultado = 1 THEN 1 ELSE 0 END) AS positivos, SUM(CASE WHEN resultado = 0 THEN 1 ELSE 0 END) AS negativos, COUNT(*) AS total FROM fato_exames_cardiacos",
+    "colunas": [
+      "positivos",
+      "negativos",
+      "total"
+    ],
+    "linhas": [
+      [
+        810,
+        509,
+        1319
+      ]
+    ]
+  },
+  "V4_amostra_juncao": {
+    "sql": "SELECT f.id_exame, p.idade, p.genero, c.frequencia_cardiaca, c.pressao_sistolica, c.pressao_diastolica, f.glicemia, f.ck_mb, f.troponina, f.resultado FROM fato_exames_cardiacos f JOIN dim_paciente p ON f.id_paciente = p.id_paciente JOIN dim_clinica c ON f.id_clinica = c.id_clinica ORDER BY f.id_exame LIMIT 5",
+    "colunas": [
+      "id_exame",
+      "idade",
+      "genero",
+      "frequencia_cardiaca",
+      "pressao_sistolica",
+      "pressao_diastolica",
+      "glicemia",
+      "ck_mb",
+      "troponina",
+      "resultado"
+    ],
+    "linhas": [
+      [
+        1,
+        64,
+        1,
+        66,
+        160,
+        83,
+        160,
+        1.8,
+        0.012,
+        0
+      ],
+      [
+        2,
+        21,
+        1,
+        94,
+        98,
+        46,
+        296,
+        6.75,
+        1.06,
+        1
+      ],
+      [
+        3,
+        55,
+        1,
+        64,
+        160,
+        77,
+        270,
+        1.99,
+        0.003,
+        0
+      ],
+      [
+        4,
+        64,
+        1,
+        70,
+        120,
+        55,
+        270,
+        13.87,
+        0.122,
+        1
+      ],
+      [
+        5,
+        55,
+        1,
+        64,
+        112,
+        65,
+        300,
+        1.08,
+        0.003,
+        0
+      ]
+    ]
+  },
+  "N1_positividade_por_faixa_e_genero": {
+    "sql": "SELECT CASE WHEN p.idade < 40 THEN '1) ate 39' WHEN p.idade < 50 THEN '2) 40-49' WHEN p.idade < 60 THEN '3) 50-59' WHEN p.idade < 70 THEN '4) 60-69' ELSE '5) 70+' END AS faixa_etaria, p.genero, COUNT(*) AS exames, SUM(f.resultado) AS positivos, ROUND(100.0 * SUM(f.resultado) / COUNT(*), 1) AS pct_positivos FROM fato_exames_cardiacos f JOIN dim_paciente p ON f.id_paciente = p.id_paciente GROUP BY faixa_etaria, p.genero ORDER BY faixa_etaria, p.genero",
+    "colunas": [
+      "faixa_etaria",
+      "genero",
+      "exames",
+      "positivos",
+      "pct_positivos"
+    ],
+    "linhas": [
+      [
+        "1) ate 39",
+        0,
+        49,
+        14,
+        28.6
+      ],
+      [
+        "1) ate 39",
+        1,
+        103,
+        45,
+        43.7
+      ],
+      [
+        "2) 40-49",
+        0,
+        66,
+        26,
+        39.4
+      ],
+      [
+        "2) 40-49",
+        1,
+        165,
+        86,
+        52.1
+      ],
+      [
+        "3) 50-59",
+        0,
+        100,
+        59,
+        59.0
+      ],
+      [
+        "3) 50-59",
+        1,
+        216,
+        143,
+        66.2
+      ],
+      [
+        "4) 60-69",
+        0,
+        120,
+        65,
+        54.2
+      ],
+      [
+        "4) 60-69",
+        1,
+        264,
+        190,
+        72.0
+      ],
+      [
+        "5) 70+",
+        0,
+        114,
+        83,
+        72.8
+      ],
+      [
+        "5) 70+",
+        1,
+        122,
+        99,
+        81.1
+      ]
+    ]
+  },
+  "N2_biomarcadores_por_faixa_e_resultado": {
+    "sql": "SELECT CASE WHEN p.idade < 40 THEN '1) ate 39' WHEN p.idade < 50 THEN '2) 40-49' WHEN p.idade < 60 THEN '3) 50-59' WHEN p.idade < 70 THEN '4) 60-69' ELSE '5) 70+' END AS faixa_etaria, f.resultado, COUNT(*) AS exames, ROUND(AVG(f.troponina), 3) AS troponina_media, ROUND(AVG(f.ck_mb), 2) AS ck_mb_media, ROUND(AVG(f.glicemia), 1) AS glicemia_media FROM fato_exames_cardiacos f JOIN dim_paciente p ON f.id_paciente = p.id_paciente GROUP BY faixa_etaria, f.resultado ORDER BY faixa_etaria, f.resultado",
+    "colunas": [
+      "faixa_etaria",
+      "resultado",
+      "exames",
+      "troponina_media",
+      "ck_mb_media",
+      "glicemia_media"
+    ],
+    "linhas": [
+      [
+        "1) ate 39",
+        0,
+        93,
+        0.004,
+        2.68,
+        143.0
+      ],
+      [
+        "1) ate 39",
+        1,
+        59,
+        0.169,
+        46.68,
+        149.3
+      ],
+      [
+        "2) 40-49",
+        0,
+        119,
+        0.006,
+        2.63,
+        142.2
+      ],
+      [
+        "2) 40-49",
+        1,
+        112,
+        0.561,
+        22.06,
+        138.8
+      ],
+      [
+        "3) 50-59",
+        0,
+        114,
+        0.006,
+        2.56,
+        157.4
+      ],
+      [
+        "3) 50-59",
+        1,
+        202,
+        0.662,
+        15.91,
+        151.8
+      ],
+      [
+        "4) 60-69",
+        0,
+        129,
+        0.088,
+        2.46,
+        160.7
+      ],
+      [
+        "4) 60-69",
+        1,
+        255,
+        0.615,
+        26.03,
+        141.7
+      ],
+      [
+        "5) 70+",
+        0,
+        54,
+        0.01,
+        2.39,
+        135.7
+      ],
+      [
+        "5) 70+",
+        1,
+        182,
+        0.544,
+        20.71,
+        142.9
+      ]
+    ]
+  },
+  "fk_check": [],
+  "V5_testes_restricoes": {
+    "colunas": [
+      "tentativa",
+      "resultado"
+    ],
+    "linhas": [
+      [
+        "exame referenciando paciente inexistente",
+        "rejeitado: FOREIGN KEY constraint failed"
+      ],
+      [
+        "genero fora do dominio {0,1}",
+        "rejeitado: CHECK constraint failed: ck_paciente_genero"
+      ],
+      [
+        "resultado fora do dominio {0,1}",
+        "rejeitado: CHECK constraint failed: ck_fato_resultado"
+      ]
+    ]
+  },
+  "reconciliacao": {
+    "fato_igual_linhas_validas": true,
+    "classes_iguais_ao_etl": true,
+    "orfaos_zero": true,
+    "fk_check_vazio": true
+  }
+}
