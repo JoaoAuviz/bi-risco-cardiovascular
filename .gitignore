@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.pyc
+banco/
+RASCUNHO*.pdf
+assets/fig1_recortada.png
+Thumbs.db
+.DS_Store
