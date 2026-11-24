@@ -30,6 +30,7 @@ BASE = Path(__file__).resolve().parent
 RES = BASE / "resultados"
 val = json.loads((RES / "validacao.json").read_text(encoding="utf-8"))
 log = json.loads((BASE / "dados" / "etl_log.json").read_text(encoding="utf-8"))
+ml = json.loads((RES / "ml.json").read_text(encoding="utf-8"))
 
 TESTE = False
 if not (log["arquivo_origem"] == "Medicaldataset.csv" and log["linhas_lidas"] == 1319):
@@ -92,8 +93,8 @@ def dec(v, c=2):
     return f"{v:,.{c}f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
-def trecho(ini, fim=None, largura=108):
-    linhas = (BASE / "01_etl_carga.py").read_text(encoding="utf-8").split("\n")
+def trecho(ini, fim=None, largura=108, arq="01_etl_carga.py"):
+    linhas = (BASE / arq).read_text(encoding="utf-8").split("\n")
     i = next(k for k, l in enumerate(linhas) if l.startswith(ini))
     j = next(k for k in range(i + 1, len(linhas)) if linhas[k].startswith(fim)) if fim else len(linhas)
     bloco = linhas[i:j]
@@ -165,7 +166,7 @@ def num_pagina(canv, doc):
 
 
 OUT_PDF = BASE / ("RASCUNHO_BASE_DE_TESTE.pdf" if TESTE else "Relatorio_Final_DataMart_Cardiaco.pdf")
-TITULO = ("ENGENHARIA DE DADOS E CARGA (ETL) DE UM DATA MART EM ESQUEMA ESTRELA PARA ANÁLISE DE "
+TITULO = ("DATA MART EM ESQUEMA ESTRELA, ETL E APRENDIZADO DE MÁQUINA PARA CLASSIFICAÇÃO DE "
           "RISCO CARDIOVASCULAR")
 doc = Doc(str(OUT_PDF), pagesize=A4, leftMargin=3 * cm, rightMargin=2 * cm, topMargin=3 * cm,
           bottomMargin=2 * cm, title=TITULO.title(), author="João Gabriel Alves Lima")
@@ -176,7 +177,7 @@ doc.addPageTemplates([PageTemplate("front", [fr]), PageTemplate("main", [fr], on
 AUTOR = "João Gabriel Alves Lima"
 INST = "FACULDADE DE TECNOLOGIA (FATEC) DE BAURU"
 CURSO = "CURSO DE ANÁLISE E DESENVOLVIMENTO DE SISTEMAS"
-PROF = "Profa. Dra. Patricia [SOBRENOME]"
+PROF = "Profa. Dra. Patricia Bellin Ribeiro"
 
 # Figura 1 (da Entrega Parcial 1) sem as margens brancas
 from PIL import ImageChops
@@ -217,7 +218,7 @@ S += [P("As doenças cardiovasculares estão entre as principais causas de morte
         "diagnóstico do infarto (THYGESEN et al., 2018)."),
       P("A Inteligência Artificial e, mais especificamente, o Aprendizado de Máquina permitem "
         "identificar padrões em conjuntos de dados clínicos e oferecer apoio à decisão dos "
-        "profissionais de saúde, sem substituir o julgamento médico. Para que esses algoritmos sejam "
+        "profissionais de saúde, sem substituir o julgamento médico (GÉRON, 2022). Para que esses algoritmos sejam "
         "aplicados de forma organizada e reprodutível, é desejável que os dados estejam estruturados "
         "em um ambiente analítico adequado, e não apenas em arquivos planos. Um Data Mart, "
         "subconjunto analítico voltado a um assunto específico, cumpre esse papel (INMON, 2005), e a "
@@ -233,11 +234,12 @@ S += [P("As doenças cardiovasculares estão entre as principais causas de morte
       P("O problema de negócio que orienta o projeto é o de classificar o risco cardíaco de um "
         "paciente a partir de seus exames clínicos. O projeto se organiza em duas frentes "
         "complementares: (i) a estruturação de um Data Mart em esquema estrela, com a engenharia de "
-        "dados que o alimenta, tema deste trabalho; e (ii) o desenvolvimento de modelos preditivos de "
-        "classificação, que consomem os dados já estruturados e não são objeto desta etapa."),
+        "dados que o alimenta; e (ii) o desenvolvimento de modelos preditivos de classificação, que "
+        "consomem os dados já estruturados no Data Mart."),
       P("O objetivo geral deste trabalho é projetar e alimentar um Data Mart em esquema estrela, por "
         "meio de um processo de ETL (Extract, Transform, Load), de modo que os dados de exames "
-        "cardíacos fiquem íntegros e prontos para consumo analítico e para a criação de dashboards. "
+        "cardíacos fiquem íntegros e prontos para consumo analítico e para a criação de dashboards, e "
+        "desenvolver, a partir deles, modelos de Aprendizado de Máquina que classifiquem o risco cardíaco. "
         "Os objetivos específicos são:"),
       P("a) programar a leitura, a limpeza e a transformação da base original;", corpo_si),
       P("b) carregar a tabela fato e as dimensões do Data Mart, respeitando a integridade "
@@ -246,8 +248,10 @@ S += [P("As doenças cardiovasculares estão entre as principais causas de morte
         "ETL;", corpo_si),
       P("d) atender a duas necessidades do gestor utilizando uma tabela fato e uma dimensão: "
         "(1) identificar o perfil de idade e gênero dos exames com resultado positivo e "
-        "(2) comparar o nível dos biomarcadores entre exames positivos e negativos por faixa etária.",
-        corpo_si)]
+        "(2) comparar o nível dos biomarcadores entre exames positivos e negativos por faixa etária;",
+        corpo_si),
+      P("e) treinar e comparar dois classificadores, Regressão Logística e Random Forest, usando os "
+        "dados lidos do Data Mart, e identificar as variáveis de maior poder preditivo.", corpo_si)]
 
 # ============================================================================
 S += [P("2 MATERIAIS E MÉTODOS", h1)]
@@ -316,6 +320,25 @@ S += [P("Conforme o enunciado da etapa, foram escolhidos a tabela fato fato_exam
         "dimensão dim_paciente para resolver duas necessidades do gestor. A dimensão dim_clinica "
         "também é carregada, pois a tabela fato possui chave estrangeira para ela, mas não participa "
         "das análises desta etapa.")]
+S += [P("2.5 Modelagem preditiva", h2)]
+S += [P("Os modelos de classificação são treinados com os dados lidos do próprio Data Mart, por meio de "
+        "uma junção entre a tabela fato e as duas dimensões, o que demonstra o consumo analítico da "
+        "estrutura construída. A variável-alvo é o resultado do exame (positivo = 1, negativo = 0) e as "
+        "variáveis preditoras são as oito demais colunas do dicionário de dados."),
+      P(f"Os dados foram divididos em 80% para treinamento ({num(ml['n_treino'])} registros) e 20% para "
+        f"teste ({num(ml['n_teste'])} registros), com divisão estratificada pela variável-alvo e semente "
+        "aleatória fixa (random_state=42) para garantir a reprodutibilidade. As variáveis foram "
+        "padronizadas com o StandardScaler, ajustado exclusivamente sobre o conjunto de treino para "
+        "evitar vazamento de dados (data leakage)."),
+      P("Dois classificadores supervisionados foram implementados com a biblioteca scikit-learn "
+        "(PEDREGOSA et al., 2011), ambos com class_weight='balanced' para mitigar o desbalanço entre "
+        "as classes: a Regressão Logística, modelo linear probabilístico usado como referência "
+        "interpretável (HOSMER; LEMESHOW; STURDIVANT, 2013), e o Random Forest, modelo de conjunto "
+        "de árvores de decisão capaz de capturar relações não lineares entre os exames (BREIMAN, "
+        "2001). O desempenho foi avaliado por acurácia, precisão, recall e F1-Score da classe "
+        "positiva, matriz de confusão, curva ROC e área sob a curva (AUC) (FAWCETT, 2006). Para "
+        "verificar a estabilidade dos resultados, aplicou-se também validação cruzada estratificada "
+        "de 5 partições sobre o conjunto completo, com o escalonador incluído em cada partição.")]
 
 # ============================================================================
 S += [P("3 DESENVOLVIMENTO E RESULTADOS", h1)]
@@ -477,6 +500,58 @@ S += [P(f"Ponderando pelo número de exames, a troponina média é de {dec(tp, 3
         "medida complementar adequada em análises futuras.")]
 
 # ============================================================================
+S += [P("3.5 Modelos preditivos", h2)]
+S += [P("Os dados são lidos do Data Mart pela junção da fato com as dimensões (Código 11). Em seguida, "
+        "o conjunto é dividido e os dois modelos são treinados dentro de um pipeline que inclui o "
+        "escalonador (Código 12). Os modelos treinados foram salvos em arquivos .pkl na pasta modelos.")]
+S += [P("Código 11 – Leitura dos dados a partir do Data Mart", legenda),
+      codigo(trecho('SQL = """', "NOMES = {", arq="03_modelos_ml.py")), P("Fonte: 03_modelos_ml.py.", fonte)]
+S += [P("Código 12 – Divisão dos dados e definição dos modelos", legenda),
+      codigo(trecho("X_tr, X_te, y_tr", "res = {", arq="03_modelos_ml.py")), P("Fonte: 03_modelos_ml.py.", fonte)]
+m = ml["modelos"]
+LR, RF = "Regressão Logística", "Random Forest"
+pc = lambda v: dec(100 * v, 1) + "%"
+t10 = [[k, pc(v["acuracia"]), pc(v["precisao"]), pc(v["recall"]), pc(v["f1"]), dec(v["auc"], 3)]
+       for k, v in m.items()]
+S += [P(f"A Tabela 10 apresenta o desempenho dos modelos no conjunto de teste, que tem "
+        f"{num(ml['n_teste'])} exames ({num(ml['teste_positivos'])} positivos e "
+        f"{num(ml['teste_negativos'])} negativos). As métricas de precisão, recall e F1 se referem à "
+        "classe positiva.")]
+S += [bloco_tabela("Tabela 10 – Desempenho dos modelos no conjunto de teste",
+                   tabela(["Modelo", "Acurácia", "Precisão", "Recall", "F1-Score", "AUC"], t10,
+                          [4.4, 2.2, 2.2, 2.2, 2.4, 2.0], (1, 2, 3, 4, 5)))]
+S += [bloco_figura("Figura 4 – Matrizes de confusão dos classificadores no conjunto de teste",
+                   RES / "ml_matrizes_confusao.png", 15.0)]
+melhor, outro = (RF, LR) if m[RF]["acuracia"] >= m[LR]["acuracia"] else (LR, RF)
+S += [P(f"O {melhor} obteve acurácia de {pc(m[melhor]['acuracia'])} e AUC de {dec(m[melhor]['auc'], 3)}, "
+        f"contra {pc(m[outro]['acuracia'])} e {dec(m[outro]['auc'], 3)} do {outro}. A diferença aparece "
+        f"principalmente nos falsos negativos (Figura 4): a Regressão Logística deixou de identificar "
+        f"{num(m[LR]['fn'])} dos {num(ml['teste_positivos'])} exames positivos (recall de "
+        f"{pc(m[LR]['recall'])}), enquanto o Random Forest deixou de identificar {num(m[RF]['fn'])} "
+        f"(recall de {pc(m[RF]['recall'])}), com {num(m[RF]['fp'])} falsos positivos. Em um contexto "
+        "clínico, o falso negativo, isto é, o paciente com lesão não identificado, é o erro de maior "
+        "custo, e é nele que os modelos mais se distinguem.")]
+S += [bloco_figura("Figura 5 – Curvas ROC dos classificadores", RES / "ml_curva_roc.png", 10.5)]
+t11 = [[k, f"{pc(v['cv_acuracia_media'])} ± {dec(100 * v['cv_acuracia_dp'], 1)}",
+        f"{dec(v['cv_auc_media'], 3)} ± {dec(v['cv_auc_dp'], 3)}"] for k, v in m.items()]
+S += [P("A curva ROC (Figura 5) mostra a capacidade de discriminação dos modelos em diferentes limiares "
+        "de decisão: quanto mais próxima do canto superior esquerdo, melhor. A validação cruzada "
+        "estratificada de 5 partições (Tabela 11) indica se esse desempenho se mantém em divisões "
+        "diferentes dos dados.")]
+S += [bloco_tabela("Tabela 11 – Validação cruzada estratificada de 5 partições (média ± desvio padrão)",
+                   tabela(["Modelo", "Acurácia", "AUC"], t11, [6.0, 5.0, 5.0], (1, 2)))]
+imp = ml["importancias"]
+top2 = imp[0][1] + imp[1][1]
+S += [bloco_figura("Figura 6 – Importância relativa das variáveis no Random Forest",
+                   RES / "ml_importancia_variaveis.png", 14.5)]
+S += [P(f"A importância das variáveis no Random Forest (Figura 6) concentra-se em {imp[0][0]} "
+        f"({pc(imp[0][1])}) e {imp[1][0]} ({pc(imp[1][1])}), que somam {pc(top2)} do total. Isso é "
+        "coerente com o papel desses biomarcadores no diagnóstico do infarto (THYGESEN et al., 2018), "
+        "mas exige cautela na interpretação: troponina e CK-MB indicam lesão miocárdica já "
+        "estabelecida, de modo que o alto desempenho reflete a identificação de um dano existente, e "
+        "não a antecipação do risco a partir de sinais básicos. Além disso, o conjunto de teste é "
+        "pequeno e os hiperparâmetros não foram otimizados, o que limita a generalização dos números.")]
+
 S += [P("4 CONCLUSÃO", h1)]
 S += [P(f"Este trabalho implementou o processo de ETL que alimenta o Data Mart de exames cardíacos: a "
         f"partir de {num(N)} linhas da base original, foram carregados {num(V)} exames na tabela fato "
@@ -494,16 +569,30 @@ S += [P(f"Este trabalho implementou o processo de ETL que alimenta o Data Mart d
       P("O valor analítico da modelagem apareceu nas duas necessidades do gestor: com consultas "
         "simples sobre uma fato e uma dimensão, foi possível identificar em que faixas etárias os "
         "exames resultam mais em diagnóstico positivo e como os biomarcadores se comportam entre "
-        "positivos e negativos."),
+        "positivos e negativos. Os dados armazenados no Data Mart também alimentaram diretamente os "
+        "modelos de classificação."),
+      P(f"Na modelagem preditiva, o {melhor} superou o {outro}, com acurácia de "
+        f"{pc(m[melhor]['acuracia'])} e AUC de {dec(m[melhor]['auc'], 3)} no conjunto de teste, e "
+        f"manteve acurácia média de {pc(m[melhor]['cv_acuracia_media'])} na validação cruzada. A "
+        f"{imp[0][0]} e a {imp[1][0]} foram as variáveis mais importantes."),
       P("Como limitações, os biomarcadores troponina e CK-MB refletem lesão miocárdica já "
-        "estabelecida, e não a predição antecipada de risco, e a base tem escopo único e restrito, com "
-        "valores atípicos isolados. Como trabalhos futuros, sugere-se utilizar o Data Mart como fonte "
-        "para os modelos preditivos de classificação previstos no projeto, estender o modelo com "
-        "dimensões de tempo e de local caso novas fontes as tragam e validar a arquitetura com bases "
-        "clínicas externas.")]
+        "estabelecida, e não a predição antecipada de risco; a base tem escopo único e restrito, com "
+        "valores atípicos isolados; o conjunto de teste é pequeno; e não houve otimização de "
+        "hiperparâmetros. Como trabalhos futuros, sugere-se treinar os modelos sem os biomarcadores de "
+        "lesão, para verificar se sinais vitais e dados demográficos conseguem prever o risco de forma "
+        "precoce, aplicar busca de hiperparâmetros (Grid Search ou Random Search), estender o modelo "
+        "com dimensões de tempo e de local caso novas fontes as tragam e validar a arquitetura com "
+        "bases clínicas externas.")]
 
 S += [P("REFERÊNCIAS", h1c)]
 refs = [
+    "BREIMAN, L. Random forests. <b>Machine Learning</b>, v. 45, n. 1, p. 5-32, 2001.",
+    "FAWCETT, T. An introduction to ROC analysis. <b>Pattern Recognition Letters</b>, v. 27, n. 8, "
+    "p. 861-874, 2006.",
+    "GÉRON, A. <b>Hands-on machine learning with Scikit-Learn, Keras, and TensorFlow</b>. 3. ed. "
+    "Sebastopol: O'Reilly Media, 2022.",
+    "HOSMER, D. W.; LEMESHOW, S.; STURDIVANT, R. X. <b>Applied logistic regression</b>. 3. ed. "
+    "Hoboken: Wiley, 2013.",
     "INMON, W. H. <b>Building the data warehouse</b>. 4. ed. Indianapolis: Wiley, 2005.",
     "KAGGLE. <b>Heart Attack Analysis Dataset (Medicaldataset.csv)</b>. Disponível em: "
     "https://www.kaggle.com. Acesso em: nov. 2026.",
@@ -511,6 +600,8 @@ refs = [
     "modeling. 3. ed. Indianapolis: Wiley, 2013.",
     "MCKINNEY, W. <b>Python para análise de dados</b>: tratamento de dados com pandas, NumPy e IPython. "
     "2. ed. São Paulo: Novatec, 2018.",
+    "PEDREGOSA, F. et al. Scikit-learn: machine learning in Python. <b>Journal of Machine Learning "
+    "Research</b>, v. 12, p. 2825-2830, 2011.",
     "POSTGRESQL GLOBAL DEVELOPMENT GROUP. <b>PostgreSQL Documentation</b>: CREATE TABLE. Disponível em: "
     "https://www.postgresql.org/docs/current/sql-createtable.html. Acesso em: nov. 2026.",
     "SQLITE. <b>Foreign Key Support</b>. Disponível em: https://www.sqlite.org/foreignkeys.html. "
