@@ -226,7 +226,7 @@ S += [P("As doenças cardiovasculares estão entre as principais causas de morte
         "medidas dos eventos, ligada a tabelas dimensão, que descrevem o contexto (KIMBALL; ROSS, "
         "2013)."),
       P("A base de dados selecionada, Medicaldataset.csv, obtida na plataforma Kaggle "
-        "(MOS3SANTOS, [s.d.]), reúne 1.319 registros de pacientes com informações demográficas (idade e "
+        "(SANTOS, 2025), reúne 1.319 registros de pacientes com informações demográficas (idade e "
         "gênero), sinais clínicos (frequência cardíaca e pressões arteriais sistólica e diastólica), "
         "glicemia e os biomarcadores CK-MB e troponina, além do resultado do exame (positivo ou "
         "negativo). A relevância da base está na combinação de medidas clínicas simples, facilmente "
@@ -598,12 +598,12 @@ refs = [
     "modeling. 3. ed. Indianapolis: Wiley, 2013.",
     "MCKINNEY, W. <b>Python para análise de dados</b>: tratamento de dados com pandas, NumPy e IPython. "
     "2. ed. São Paulo: Novatec, 2018.",
-    "MOS3SANTOS. <b>Ataque cardíaco</b>. [S. l.]: Kaggle, [s.d.]. Conjunto de dados (Medicaldataset.csv). "
-    "Disponível em: https://www.kaggle.com/datasets/mos3santos/ataque-cardaco. Acesso em: 24 nov. 2026.",
     "PEDREGOSA, F. et al. Scikit-learn: machine learning in Python. <b>Journal of Machine Learning "
     "Research</b>, v. 12, p. 2825-2830, 2011.",
     "POSTGRESQL GLOBAL DEVELOPMENT GROUP. <b>PostgreSQL Documentation</b>: CREATE TABLE. Disponível em: "
     "https://www.postgresql.org/docs/current/sql-createtable.html. Acesso em: 24 nov. 2026.",
+    "SANTOS, M. <b>Ataque cardíaco</b>. [S. l.]: Kaggle, 2025. Conjunto de dados (Medicaldataset.csv). "
+    "Disponível em: https://www.kaggle.com/datasets/mos3santos/ataque-cardaco. Acesso em: 24 nov. 2026.",
     "SQLITE. <b>Foreign Key Support</b>. Disponível em: https://www.sqlite.org/foreignkeys.html. "
     "Acesso em: 24 nov. 2026.",
     "THYGESEN, K. et al. Fourth Universal Definition of Myocardial Infarction (2018). <b>Circulation</b>, "
