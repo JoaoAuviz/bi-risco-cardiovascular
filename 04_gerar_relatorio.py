@@ -225,8 +225,8 @@ S += [P("As doenças cardiovasculares estão entre as principais causas de morte
         "modelagem multidimensional em esquema estrela organiza os dados em uma tabela fato, com as "
         "medidas dos eventos, ligada a tabelas dimensão, que descrevem o contexto (KIMBALL; ROSS, "
         "2013)."),
-      P("A base de dados selecionada, Medicaldataset.csv, obtida na plataforma Kaggle (Heart Attack "
-        "Analysis Dataset), reúne 1.319 registros de pacientes com informações demográficas (idade e "
+      P("A base de dados selecionada, Medicaldataset.csv, obtida na plataforma Kaggle "
+        "(MOS3SANTOS, [s.d.]), reúne 1.319 registros de pacientes com informações demográficas (idade e "
         "gênero), sinais clínicos (frequência cardíaca e pressões arteriais sistólica e diastólica), "
         "glicemia e os biomarcadores CK-MB e troponina, além do resultado do exame (positivo ou "
         "negativo). A relevância da base está na combinação de medidas clínicas simples, facilmente "
@@ -594,12 +594,12 @@ refs = [
     "HOSMER, D. W.; LEMESHOW, S.; STURDIVANT, R. X. <b>Applied logistic regression</b>. 3. ed. "
     "Hoboken: Wiley, 2013.",
     "INMON, W. H. <b>Building the data warehouse</b>. 4. ed. Indianapolis: Wiley, 2005.",
-    "KAGGLE. <b>Heart Attack Analysis Dataset (Medicaldataset.csv)</b>. Disponível em: "
-    "https://www.kaggle.com. Acesso em: 24 nov. 2026.",
     "KIMBALL, R.; ROSS, M. <b>The data warehouse toolkit</b>: the definitive guide to dimensional "
     "modeling. 3. ed. Indianapolis: Wiley, 2013.",
     "MCKINNEY, W. <b>Python para análise de dados</b>: tratamento de dados com pandas, NumPy e IPython. "
     "2. ed. São Paulo: Novatec, 2018.",
+    "MOS3SANTOS. <b>Ataque cardíaco</b>. [S. l.]: Kaggle, [s.d.]. Conjunto de dados (Medicaldataset.csv). "
+    "Disponível em: https://www.kaggle.com/datasets/mos3santos/ataque-cardaco. Acesso em: 24 nov. 2026.",
     "PEDREGOSA, F. et al. Scikit-learn: machine learning in Python. <b>Journal of Machine Learning "
     "Research</b>, v. 12, p. 2825-2830, 2011.",
     "POSTGRESQL GLOBAL DEVELOPMENT GROUP. <b>PostgreSQL Documentation</b>: CREATE TABLE. Disponível em: "
