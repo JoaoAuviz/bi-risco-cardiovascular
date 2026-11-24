@@ -212,7 +212,7 @@ S += [P("1 INTRODUÇÃO E OBJETIVOS", h1)]
 S += [P("As doenças cardiovasculares estão entre as principais causas de morte no mundo, e eventos "
         "graves como o infarto agudo do miocárdio e a morte súbita frequentemente ocorrem sem que o "
         "paciente tenha sido identificado previamente como de alto risco (WORLD HEALTH ORGANIZATION, "
-        "s.d.). Nesse cenário, a rapidez e a precisão na interpretação dos exames clínicos influenciam "
+        "[s.d.]). Nesse cenário, a rapidez e a precisão na interpretação dos exames clínicos influenciam "
         "diretamente o desfecho do atendimento. Entre esses exames, os biomarcadores de lesão "
         "miocárdica, em especial a troponina cardíaca e a enzima CK-MB, ocupam papel central no "
         "diagnóstico do infarto (THYGESEN et al., 2018)."),
@@ -301,7 +301,7 @@ S += [bloco_tabela("Tabela 2 – Relacionamentos entre as tabelas do Data Mart",
 S += [P("2.3 Infraestrutura técnica e construção física", h2)]
 S += [P("A estrutura física foi criada por um script SQL em linguagem de definição de dados (DDL), "
         "escrito em SQL padrão, seguindo a sintaxe documentada pelo PostgreSQL (POSTGRESQL GLOBAL "
-        "DEVELOPMENT GROUP, s.d.). O script contém: remoção prévia das tabelas (DROP TABLE IF "
+        "DEVELOPMENT GROUP, [s.d.]). O script contém: remoção prévia das tabelas (DROP TABLE IF "
         "EXISTS) em ordem inversa às dependências; chaves primárias inteiras (id_paciente, "
         "id_clinica e id_exame); chaves estrangeiras na tabela fato; tipos SMALLINT para idade, "
         "gênero, sinais vitais e resultado, e NUMERIC com precisão definida para glicemia, CK-MB e "
@@ -309,9 +309,9 @@ S += [P("A estrutura física foi criada por um script SQL em linguagem de defini
         "CHECK (gênero e resultado restritos a 0 ou 1, idade entre 1 e 129 anos e sinais vitais "
         "positivos); e índices sobre as chaves estrangeiras da fato."),
       P("O processo de ETL foi programado em Python 3, com a biblioteca pandas (MCKINNEY, 2018), em "
-        "script compatível com o ambiente Google Colab utilizado nas etapas anteriores. A carga e a "
+        "script desenvolvido para o Google Colab, ambiente utilizado nas etapas anteriores, e que também pode ser executado em máquina local. A carga e a "
         "validação foram executadas em um banco SQLite com a verificação de chaves estrangeiras "
-        "ativada (SQLITE, s.d.), que executa o mesmo script DDL sem alterações. O programa também "
+        "ativada (SQLITE, [s.d.]), que executa o mesmo script DDL sem alterações. O programa também "
         "gera o arquivo 02_carga_dados.sql, com comandos INSERT em SQL padrão, que permite repetir a "
         "carga em outro sistema gerenciador de banco de dados, como o PostgreSQL.")]
 
@@ -595,7 +595,7 @@ refs = [
     "Hoboken: Wiley, 2013.",
     "INMON, W. H. <b>Building the data warehouse</b>. 4. ed. Indianapolis: Wiley, 2005.",
     "KAGGLE. <b>Heart Attack Analysis Dataset (Medicaldataset.csv)</b>. Disponível em: "
-    "https://www.kaggle.com. Acesso em: nov. 2026.",
+    "https://www.kaggle.com. Acesso em: 24 nov. 2026.",
     "KIMBALL, R.; ROSS, M. <b>The data warehouse toolkit</b>: the definitive guide to dimensional "
     "modeling. 3. ed. Indianapolis: Wiley, 2013.",
     "MCKINNEY, W. <b>Python para análise de dados</b>: tratamento de dados com pandas, NumPy e IPython. "
@@ -603,13 +603,13 @@ refs = [
     "PEDREGOSA, F. et al. Scikit-learn: machine learning in Python. <b>Journal of Machine Learning "
     "Research</b>, v. 12, p. 2825-2830, 2011.",
     "POSTGRESQL GLOBAL DEVELOPMENT GROUP. <b>PostgreSQL Documentation</b>: CREATE TABLE. Disponível em: "
-    "https://www.postgresql.org/docs/current/sql-createtable.html. Acesso em: nov. 2026.",
+    "https://www.postgresql.org/docs/current/sql-createtable.html. Acesso em: 24 nov. 2026.",
     "SQLITE. <b>Foreign Key Support</b>. Disponível em: https://www.sqlite.org/foreignkeys.html. "
-    "Acesso em: nov. 2026.",
+    "Acesso em: 24 nov. 2026.",
     "THYGESEN, K. et al. Fourth Universal Definition of Myocardial Infarction (2018). <b>Circulation</b>, "
     "v. 138, n. 20, p. e618-e651, 2018.",
     "WORLD HEALTH ORGANIZATION. <b>Cardiovascular diseases (CVDs)</b>. Disponível em: "
-    "https://www.who.int/news-room/fact-sheets/detail/cardiovascular-diseases-(cvds). Acesso em: nov. 2026.",
+    "https://www.who.int/news-room/fact-sheets/detail/cardiovascular-diseases-(cvds). Acesso em: 24 nov. 2026.",
 ]
 S += [P(r, ref) for r in refs]
 

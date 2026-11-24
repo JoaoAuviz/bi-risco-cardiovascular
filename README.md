@@ -42,6 +42,10 @@ python 04_gerar_relatorio.py
 
 O relatório só é gerado se a base for o `Medicaldataset.csv` com 1.319 linhas.
 
+## Executar no Google Colab
+
+Abra `executar_no_colab.ipynb` no Colab, envie o zip do projeto e execute as células em ordem.
+
 ## Saídas
 
 - `banco/datamart_cardiaco.sqlite` — banco populado (validação local)
