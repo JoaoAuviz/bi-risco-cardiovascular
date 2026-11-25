@@ -313,7 +313,9 @@ S += [P("A estrutura física foi criada por um script SQL em linguagem de defini
         "validação foram executadas em um banco SQLite com a verificação de chaves estrangeiras "
         "ativada (SQLITE, [s.d.]), que executa o mesmo script DDL sem alterações. O programa também "
         "gera o arquivo 02_carga_dados.sql, com comandos INSERT em SQL padrão, que permite repetir a "
-        "carga em outro sistema gerenciador de banco de dados, como o PostgreSQL.")]
+        "carga em outro sistema gerenciador de banco de dados. Essa carga foi repetida em um servidor "
+        "MySQL do XAMPP, administrado pelo phpMyAdmin, com o mesmo script DDL, para comprovar o "
+        "resultado em um sistema gerenciador de banco de dados relacional (seção 3.3).")]
 
 S += [P("2.4 Escopo da análise", h2)]
 S += [P("Conforme o enunciado da etapa, foram escolhidos a tabela fato fato_exames_cardiacos e a "
@@ -432,11 +434,31 @@ t7 = [[a, b] for a, b in val["V5_testes_restricoes"]["linhas"]]
 S += [bloco_tabela("Tabela 7 – Teste de restrições do banco (V5)",
                    tabela(["Tentativa de inserção", "Resultado"], t7, [7, 9]))]
 
+S += [P("Para comprovar que o banco multidimensional foi populado em um sistema gerenciador de banco "
+        "de dados relacional, o mesmo script DDL e o arquivo 02_carga_dados.sql foram executados em um "
+        "servidor MySQL do XAMPP, administrado pelo phpMyAdmin, no banco datamart_cardiaco. As Figuras 2 "
+        "a 5 mostram as consultas de validação (Códigos 6 a 8 e a consulta de distribuição do "
+        "resultado) e as Figuras 6 e 7 mostram as consultas das duas necessidades do gestor (Códigos 9 "
+        "e 10). Os resultados são idênticos aos obtidos na execução em SQLite.")]
+_PR = BASE / "assets" / "prints_mysql"
+_legendas = [
+    ("v1_contagem", "Figura 2 – Contagem de registros por tabela no MySQL (Código 6)"),
+    ("v2_orfaos", "Figura 3 – Fatos órfãos por dimensão no MySQL (Código 7)"),
+    ("v3_resultado", "Figura 4 – Distribuição do resultado dos exames na tabela fato no MySQL"),
+    ("v4_juncao", "Figura 5 – Amostra da junção entre a fato e as dimensões no MySQL (Código 8)"),
+    ("n1_positividade", "Figura 6 – Necessidade 1 no MySQL: positivos por faixa etária e gênero (Código 9)"),
+    ("n2_biomarcadores", "Figura 7 – Necessidade 2 no MySQL: biomarcadores por faixa etária e resultado (Código 10)"),
+]
+for _nome, _leg in _legendas:
+    _w = PILImage.open(_PR / f"{_nome}.png").size[0]
+    S += [bloco_figura(_leg, _PR / f"{_nome}.png", min(15.5, _w * 0.0185),
+                       "Fonte: Captura de tela do phpMyAdmin (recorte), elaborada pelo autor (2026).")]
+
 S += [P("3.4 Atendimento às necessidades do gestor", h2)]
 S += [P("Necessidade 1: qual o perfil de idade e gênero dos exames positivos?", h2)]
 n1 = val["N1_positividade_por_faixa_e_genero"]["linhas"]
 S += [P("A consulta junta a fato à dimensão dim_paciente, agrupa por faixa etária e gênero e calcula o "
-        "percentual de resultados positivos (Código 9, Tabela 8 e Figura 2). As faixas etárias são "
+        "percentual de resultados positivos (Código 9, Tabela 8 e Figura 8). As faixas etárias são "
         "derivadas da idade na própria consulta.")]
 S += [P("Código 9 – Positividade por faixa etária e gênero", legenda),
       codigo(sql_q("N1_positividade_por_faixa_e_genero")), P("Fonte: 02_validacao.py.", fonte)]
@@ -445,7 +467,7 @@ t8 = [[lab(r[0]), str(r[1]), num(r[2]), num(r[3]), dec(r[4], 1) + "%"] for r in 
 S += [bloco_tabela("Tabela 8 – Exames e percentual de positivos por faixa etária e gênero (N1)",
                    tabela(["Faixa etária", "Gênero", "Exames", "Positivos", "% positivos"], t8,
                           [3.6, 2.6, 3.0, 3.0, 3.8], (2, 3, 4)))]
-S += [bloco_figura("Figura 2 – Percentual de positivos por faixa etária e gênero",
+S += [bloco_figura("Figura 8 – Percentual de positivos por faixa etária e gênero",
                    RES / "grafico_positividade.png", 14.5)]
 agg = {}
 for f, g, ex, po, pc in n1:
@@ -467,7 +489,7 @@ S += [P(f"Somando os dois gêneros, o percentual de positivos {txt_tend}{dec(bai
 S += [P("Necessidade 2: como os biomarcadores diferem entre exames positivos e negativos?", h2)]
 n2 = val["N2_biomarcadores_por_faixa_e_resultado"]["linhas"]
 S += [P("A segunda consulta usa a mesma fato e a mesma dimensão para calcular as médias de troponina, "
-        "CK-MB e glicemia por faixa etária e resultado (Código 10, Tabela 9 e Figura 3).")]
+        "CK-MB e glicemia por faixa etária e resultado (Código 10, Tabela 9 e Figura 9).")]
 S += [P("Código 10 – Biomarcadores por faixa etária e resultado", legenda),
       codigo(sql_q("N2_biomarcadores_por_faixa_e_resultado")), P("Fonte: 02_validacao.py.", fonte)]
 t9 = [[lab(r[0]), "Positivo" if r[1] == 1 else "Negativo", num(r[2]), dec(r[3], 3), dec(r[4], 2),
@@ -475,7 +497,7 @@ t9 = [[lab(r[0]), "Positivo" if r[1] == 1 else "Negativo", num(r[2]), dec(r[3], 
 S += [bloco_tabela("Tabela 9 – Média dos biomarcadores por faixa etária e resultado (N2)",
                    tabela(["Faixa etária", "Resultado", "Exames", "Troponina", "CK-MB", "Glicemia"], t9,
                           [2.8, 2.6, 2.4, 2.8, 2.6, 2.8], (2, 3, 4, 5)))]
-S += [bloco_figura("Figura 3 – Troponina média por faixa etária e resultado",
+S += [bloco_figura("Figura 9 – Troponina média por faixa etária e resultado",
                    RES / "grafico_troponina.png", 14.5)]
 
 
@@ -520,21 +542,21 @@ S += [P(f"A Tabela 10 apresenta o desempenho dos modelos no conjunto de teste, q
 S += [bloco_tabela("Tabela 10 – Desempenho dos modelos no conjunto de teste",
                    tabela(["Modelo", "Acurácia", "Precisão", "Recall", "F1-Score", "AUC"], t10,
                           [4.4, 2.2, 2.2, 2.2, 2.4, 2.0], (1, 2, 3, 4, 5)))]
-S += [bloco_figura("Figura 4 – Matrizes de confusão dos classificadores no conjunto de teste",
+S += [bloco_figura("Figura 10 – Matrizes de confusão dos classificadores no conjunto de teste",
                    RES / "ml_matrizes_confusao.png", 15.0)]
 melhor, outro = (RF, LR) if m[RF]["acuracia"] >= m[LR]["acuracia"] else (LR, RF)
 S += [P(f"O {melhor} obteve acurácia de {pc(m[melhor]['acuracia'])} e AUC de {dec(m[melhor]['auc'], 3)}, "
         f"contra {pc(m[outro]['acuracia'])} e {dec(m[outro]['auc'], 3)} do {outro}. A diferença aparece "
-        f"principalmente nos falsos negativos (Figura 4): a Regressão Logística deixou de identificar "
+        f"principalmente nos falsos negativos (Figura 10): a Regressão Logística deixou de identificar "
         f"{num(m[LR]['fn'])} dos {num(ml['teste_positivos'])} exames positivos (recall de "
         f"{pc(m[LR]['recall'])}), enquanto o Random Forest deixou de identificar {num(m[RF]['fn'])} "
         f"(recall de {pc(m[RF]['recall'])}), com {num(m[RF]['fp'])} falsos positivos. Em um contexto "
         "clínico, o falso negativo, isto é, o paciente com lesão não identificado, é o erro de maior "
         "custo, e é nele que os modelos mais se distinguem.")]
-S += [bloco_figura("Figura 5 – Curvas ROC dos classificadores", RES / "ml_curva_roc.png", 10.5)]
+S += [bloco_figura("Figura 11 – Curvas ROC dos classificadores", RES / "ml_curva_roc.png", 10.5)]
 t11 = [[k, f"{pc(v['cv_acuracia_media'])} ± {dec(100 * v['cv_acuracia_dp'], 1)}",
         f"{dec(v['cv_auc_media'], 3)} ± {dec(v['cv_auc_dp'], 3)}"] for k, v in m.items()]
-S += [P("A curva ROC (Figura 5) mostra a capacidade de discriminação dos modelos em diferentes limiares "
+S += [P("A curva ROC (Figura 11) mostra a capacidade de discriminação dos modelos em diferentes limiares "
         "de decisão: quanto mais próxima do canto superior esquerdo, melhor. A validação cruzada "
         "estratificada de 5 partições (Tabela 11) indica se esse desempenho se mantém em divisões "
         "diferentes dos dados.")]
@@ -542,9 +564,9 @@ S += [bloco_tabela("Tabela 11 – Validação cruzada estratificada de 5 partiç
                    tabela(["Modelo", "Acurácia", "AUC"], t11, [6.0, 5.0, 5.0], (1, 2)))]
 imp = ml["importancias"]
 top2 = imp[0][1] + imp[1][1]
-S += [bloco_figura("Figura 6 – Importância relativa das variáveis no Random Forest",
+S += [bloco_figura("Figura 12 – Importância relativa das variáveis no Random Forest",
                    RES / "ml_importancia_variaveis.png", 14.5)]
-S += [P(f"A importância das variáveis no Random Forest (Figura 6) concentra-se em {imp[0][0]} "
+S += [P(f"A importância das variáveis no Random Forest (Figura 12) concentra-se em {imp[0][0]} "
         f"({pc(imp[0][1])}) e {imp[1][0]} ({pc(imp[1][1])}), que somam {pc(top2)} do total. Isso é "
         "coerente com o papel desses biomarcadores no diagnóstico do infarto (THYGESEN et al., 2018), "
         "mas exige cautela na interpretação: troponina e CK-MB indicam lesão miocárdica já "
